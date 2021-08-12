@@ -33,47 +33,28 @@ namespace BusinessLogic.Services
             return await _genericRepository.GetInInterval(roomId, from, to);
         }
 
-        private bool CheckChoosedData(ReservationUpdateModel reserve)
+        private bool CheckChoosedData(Reservation reservation)
         {
             var query = _genericRepository.Query()
-                    .Where(x => x.MeetingRoomId == reserve.MeetingRoomId && x.TimeFrom < reserve.To && x.TimeTo > reserve.From);
-            if (reserve.Id != 0)
-                query = query.Where(x => x.Id != reserve.Id);
-            return reserve.From < DateTime.Now || reserve.To < reserve.From || reserve.To.Subtract(reserve.From) > _maximumReservationTime || query.Any();
+                    .Where(x => x.MeetingRoomId == reservation.MeetingRoomId && x.TimeFrom < reservation.TimeTo && x.TimeTo > reservation.TimeFrom);
+            if (reservation.Id != 0)
+                query = query.Where(x => x.Id != reservation.Id);
+            Console.WriteLine($"ddd, {reservation.TimeFrom}");
+            return reservation.TimeFrom < DateTime.Now || reservation.TimeTo < reservation.TimeFrom || reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime || query.Any();
         }
 
-        public async Task<Tuple<bool, Reservation>> Add(ReservationUpdateModel reserve, User user, MeetingRoom room)
+        public async Task<bool> Add(Reservation reservation)
         {
-            if (CheckChoosedData(reserve)) return new Tuple<bool, Reservation>(false, null);
-            var reservation = new Reservation
-            {
-                Id = reserve.Id,
-                User = user,
-                UserId = user.Id,
-                MeetingRoom = room,
-                MeetingRoomId = room.Id,
-                TimeFrom = reserve.From,
-                TimeTo = reserve.To
-            };
-            
-            return new Tuple<bool, Reservation>(true, await _genericRepository.AddAsync(reservation));
+            if (CheckChoosedData(reservation)) return false;
+            await _genericRepository.AddAsync(reservation);
+            return true;
         }
 
-        public async Task<Tuple<bool, Reservation>> Update(ReservationUpdateModel reserve, User user, MeetingRoom room)
+        public async Task<bool> Update(Reservation reservation)
         {
-            if (CheckChoosedData(reserve)) return new Tuple<bool, Reservation>(false, null);
-            var reservation = new Reservation
-            {
-                Id = reserve.Id,
-                User = user,
-                UserId = user.Id,
-                MeetingRoom = room,
-                MeetingRoomId = room.Id,
-                TimeFrom = reserve.From,
-                TimeTo = reserve.To
-            };
-
-            return new Tuple<bool, Reservation>(true, await _genericRepository.UpdateAsync(reservation));
+            if (CheckChoosedData(reservation)) return false;
+            await _genericRepository.UpdateAsync(reservation);
+            return true;
         }
 
         public async Task<Reservation> Delete(int id)

@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeetingRoomsService", "MeetingRoomsService\MeetingRoomsService.csproj", "{2D60C177-6930-432B-AA36-6254B17A0E65}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLogic", "BusinessLogic\BusinessLogic.csproj", "{CCBAA466-E6DE-4A86-AE09-7066820E7C84}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLogic.Test", "BusinessLogic.Test\BusinessLogic.Test.csproj", "{19EA3174-93DC-4712-8AA4-954862B19E8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{109E5336-CED7-42EF-BE1D-E6771932E85B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{109E5336-CED7-42EF-BE1D-E6771932E85B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeetingRoomsServiceApp", "MeetingRoomsServiceApp\MeetingRoomsServiceApp.csproj", "{9749DE43-3012-40A1-B5F2-4A9454459E1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2D60C177-6930-432B-AA36-6254B17A0E65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D60C177-6930-432B-AA36-6254B17A0E65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2D60C177-6930-432B-AA36-6254B17A0E65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2D60C177-6930-432B-AA36-6254B17A0E65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CCBAA466-E6DE-4A86-AE09-7066820E7C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CCBAA466-E6DE-4A86-AE09-7066820E7C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCBAA466-E6DE-4A86-AE09-7066820E7C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{109E5336-CED7-42EF-BE1D-E6771932E85B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{109E5336-CED7-42EF-BE1D-E6771932E85B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{109E5336-CED7-42EF-BE1D-E6771932E85B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9749DE43-3012-40A1-B5F2-4A9454459E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9749DE43-3012-40A1-B5F2-4A9454459E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9749DE43-3012-40A1-B5F2-4A9454459E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9749DE43-3012-40A1-B5F2-4A9454459E1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
