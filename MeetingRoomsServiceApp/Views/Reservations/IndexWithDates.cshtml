@@ -1,0 +1,85 @@
+﻿@model ResultModel
+@{
+    ViewData["Title"] = "Список дней за период";
+    List<string> colors = new List<string>() { "yellow", "green", "red" };
+}
+
+<h1>Список дней за период</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form asp-controller="Reservations" asp-action="IndexWithDates" method="post">
+    С: <input asp-for="Start" placeholder="@DateTime.Now" />
+    До: <input asp-for="End" placeholder="@DateTime.Now.AddHours(1)" />
+        <label asp-for="MeetingRoomId" class="control-label"></label>
+        <select asp-for="MeetingRoomId" class="form-control" asp-items="ViewBag.MeetingRoomId">
+            <option>All</option>
+        </select>
+        <button type="submit">Обновить список</button>
+</form>
+<br />
+
+@for (int i = 0; i < Math.Ceiling((double)(Model.End.Subtract(Model.Start).Days+1)/7); i++)
+{
+    <table border="1">
+        <thead>
+            <tr>
+                <th width="10%">
+
+                </th>
+                @for (int j = 0; j < 7; j++)
+                {
+                    <th width="10%">
+                        @Model.Start.AddDays(7*i+j).ToShortDateString()
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{ var temp = Model.Start.AddDays(7 * (i+1));
+                DateTime curFrom = new DateTime(temp.Year, temp.Month, temp.Day, 8, 0, 0);
+                DateTime curTo = curFrom.AddMinutes(30);}
+            @for (int j = 0; j < 29; j++) 
+             {
+                curFrom = curFrom.AddDays(-7);
+                curTo = curTo.AddDays(-7);
+            <tr>
+                @if (j % 2 != 0)
+                {
+                    <th>
+                        @(8+j/2):30
+                    </th>
+                }
+                else
+                {
+                    <th>
+                        @(8+j/2):00
+                    </th>
+                }
+                @for (int l = 0; l < 7; l++)
+                {
+                    var reservedHere = Model.Reservations.Where(x => x.TimeFrom < curTo && x.TimeTo > curFrom).ToList();
+                    if (reservedHere.Any())
+                    {
+                        foreach (var reservation in reservedHere)
+                        {
+                            <td bgcolor="@colors[reservation.MeetingRoomId]"></td>
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                    curFrom = curFrom.AddDays(1);
+                    curTo = curTo.AddDays(1);
+                }
+            </tr>
+                curFrom = curFrom.AddMinutes(30);
+                curTo = curTo.AddMinutes(30);
+             }
+        </tbody>
+    </table>
+}

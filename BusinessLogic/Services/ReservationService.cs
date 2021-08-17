@@ -28,7 +28,7 @@ namespace BusinessLogic.Services
             return await _genericRepository.GetReservationById(id);
         }
 
-        public async Task<List<Reservation>> GetInInterval(int roomId, DateTime from, DateTime to)
+        public async Task<List<Reservation>> GetInInterval(DateTime? from, DateTime? to, int? roomId = null)
         {
             return await _genericRepository.GetInInterval(roomId, from, to);
         }
@@ -39,8 +39,8 @@ namespace BusinessLogic.Services
                     .Where(x => x.MeetingRoomId == reservation.MeetingRoomId && x.TimeFrom < reservation.TimeTo && x.TimeTo > reservation.TimeFrom);
             if (reservation.Id != 0)
                 query = query.Where(x => x.Id != reservation.Id);
-            Console.WriteLine($"ddd, {reservation.TimeFrom}");
-            return reservation.TimeFrom < DateTime.Now || reservation.TimeTo < reservation.TimeFrom || reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime || query.Any();
+            Console.WriteLine($"ddd, {reservation.TimeFrom < DateTime.Now.AddMinutes(-10)} {reservation.TimeTo < reservation.TimeFrom} {reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime} {query.Any()}");
+            return reservation.TimeFrom < DateTime.Now.AddMinutes(-10) || reservation.TimeTo < reservation.TimeFrom || reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime || query.Any();
         }
 
         public async Task<bool> Add(Reservation reservation)
