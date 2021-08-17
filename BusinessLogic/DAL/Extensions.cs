@@ -31,10 +31,13 @@ namespace BusinessLogic.DAL
             return reservation;
         }
 
-        public static Task<List<Reservation>> GetInInterval(this IGenericRepository<Reservation> repository, int roomId, DateTime from, DateTime to)
+        public static Task<List<Reservation>> GetInInterval(this IGenericRepository<Reservation> repository, int? roomId, DateTime? from, DateTime? to)
         {
-            return repository.Query().Where(x => x.MeetingRoomId == roomId && x.TimeFrom < to && x.TimeTo > from)
-                .ToListAsync();
+            IQueryable<Reservation> query = repository.Query().Include(x => x.MeetingRoom).Include(x => x.User);
+            if (roomId != null) query = query.Where(x => x.MeetingRoomId == roomId);
+            if (from != null) query = query.Where(x => x.TimeTo > from); 
+            if (to != null) query = query.Where(x => x.TimeFrom < to); 
+            return query.ToListAsync();
         }
     }
 }
