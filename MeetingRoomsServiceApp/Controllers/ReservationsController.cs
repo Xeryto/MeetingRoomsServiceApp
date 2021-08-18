@@ -40,7 +40,7 @@ namespace MeetingRoomsServiceApp.Controllers
             var end = start.AddMonths(1).AddDays(-1);
             var list = GetDays(start, end);
             var reservations = await _service.GetInInterval(start, end);
-            return View("IndexWithDates", new ResultModel
+            return View(new ResultModel
             {
                 Start = start,
                 End = end,
