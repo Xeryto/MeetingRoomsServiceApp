@@ -43,7 +43,7 @@ namespace MeetingRoomsServiceApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] MeetingRoom meetingRoom)
+        public async Task<IActionResult> Create([Bind("Id,Name,Color")] MeetingRoom meetingRoom)
         {
             if (ModelState.IsValid)
             {
@@ -64,7 +64,7 @@ namespace MeetingRoomsServiceApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] MeetingRoom meetingRoom)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Color")] MeetingRoom meetingRoom)
         {
             if (ModelState.IsValid)
             {

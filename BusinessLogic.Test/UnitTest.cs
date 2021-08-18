@@ -40,26 +40,23 @@ namespace BusinessLogic.Test
             };
             users.Add(user);
             users.Add(user1);
-            (await service.Add(user)).Should().Be(user);
-            (await service.Add(user1)).Should().Be(user1);
+            (await service.Add(user)).Should().BeTrue();
+            (await service.Add(user1)).Should().BeTrue();
             (await service.GetAll()).Should().Equal(users);
             (await service.GetById(1)).Should().Be(user);
             service.Invoking(y => y.GetById(3)).Should()
-                .Throw<Exception>().WithMessage("Entity with id 3 doesn't exist");
+                .ThrowAsync<Exception>().WithMessage("Entity with id 3 doesn't exist");
             (await service.GetByLogin("abra")).Should().Be(user);
-            service.Invoking(y => y.GetByLogin("wronglogin")).Should().Throw<Exception>()
-                .WithMessage("Entity with id 0 doesn't exist");
-            (await service.GetByName("Shapoklyak")).Should().Be(user);
-            service.Invoking(y => y.GetByName("wrongname")).Should().Throw<Exception>()
+            service.Invoking(y => y.GetByLogin("wronglogin")).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 0 doesn't exist");
             service.CheckExists("abra").Should().BeTrue();
             service.CheckExists("wronglogin").Should().BeFalse();
             user.Password = "1234";
-            (await service.Update(user)).Should().Be(user);
-            (await service.Login("abra", "1234")).Should().Be(true);
-            (await service.Login("abra", "cadabra")).Should().Be(false);
+            (await service.Update(user)).Should().BeTrue();
+            (await service.Login("abra", "1234")).Should().BeTrue();
+            (await service.Login("abra", "cadabra")).Should().BeFalse();
             (await service.Delete(1)).Should().Be(user);
-            service.Invoking(y => y.Delete(3)).Should().Throw<Exception>()
+            service.Invoking(y => y.Delete(3)).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 3 doesn't exist");
         }
 
@@ -85,15 +82,15 @@ namespace BusinessLogic.Test
             (await service.Add(meetingRoom1)).Should().Be(meetingRoom1);
             (await service.GetAll()).Should().Equal(meetingRooms);
             (await service.GetById(1)).Should().Be(meetingRoom);
-            service.Invoking(s => s.GetById(3)).Should().Throw<Exception>()
+            service.Invoking(s => s.GetById(3)).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 3 doesn't exist");
             (await service.GetByName("index")).Should().Be(meetingRoom);
-            service.Invoking(y => y.GetByName("wrongname")).Should().Throw<Exception>()
+            service.Invoking(y => y.GetByName("wrongname")).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 0 doesn't exist");
             meetingRoom.Name = "changed";
             (await service.Update(meetingRoom)).Should().Be(meetingRoom);
             (await service.Delete(1)).Should().Be(meetingRoom);
-            service.Invoking(y => y.Delete(3)).Should().Throw<Exception>()
+            service.Invoking(y => y.Delete(3)).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 3 doesn't exist");
         }
 
@@ -136,43 +133,19 @@ namespace BusinessLogic.Test
                 Id = 2,
                 Name = "pablo"
             };
-            ReservationUpdateModel reserve = new()
-            {
-                Id = 1,
-                UserId = user.Id,
-                MeetingRoomId = meetingRoom.Id,
-                From = from,
-                To = to
-            };
-            ReservationUpdateModel reserve1 = new()
-            {
-                Id = 2,
-                UserId = user1.Id,
-                MeetingRoomId = meetingRoom1.Id,
-                From = from1,
-                To = to1
-            };
-            ReservationUpdateModel incorrectReserve = new()
-            {
-                Id = 3,
-                UserId = user1.Id,
-                MeetingRoomId = meetingRoom.Id,
-                From = incorrectFrom,
-                To = incorrectTo
-            };
             Reservation reservation = new()
             {
-                Id = reserve.Id,
+                Id = 1,
                 User = user,
                 UserId = user.Id,
                 MeetingRoom = meetingRoom,
                 MeetingRoomId = meetingRoom.Id,
-                TimeFrom = reserve.From,
-                TimeTo = reserve.To
+                TimeFrom = from,
+                TimeTo = to
             };
             Reservation reservation1 = new()
             {
-                Id = reserve1.Id,
+                Id = 2,
                 UserId = user1.Id,
                 MeetingRoomId = meetingRoom1.Id,
                 TimeFrom = from1,
@@ -180,35 +153,43 @@ namespace BusinessLogic.Test
                 User = user1,
                 MeetingRoom = meetingRoom1
             };
+            Reservation incorrectReservation = new()
+            {
+                Id = 3,
+                UserId = user1.Id,
+                MeetingRoomId = meetingRoom.Id,
+                TimeFrom = incorrectFrom,
+                TimeTo = incorrectTo,
+                User = user1,
+                MeetingRoom = meetingRoom1
+            };
             reservations.Add(reservation);
             reservations.Add(reservation1);
             intervalReservations.Add(reservation1);
-            (await service.Add(reserve, user, meetingRoom)).Should()
-                .Be(new Tuple<bool, Reservation>(true, reservation));
-            (await service.Add(reserve1, user1, meetingRoom1)).Should()
-                .Be(new Tuple<bool, Reservation>(true, reservation1));
-            (await service.Add(incorrectReserve, user1, meetingRoom)).Should()
-                .Be(new Tuple<bool, Reservation>(false, null));
+            (await service.Add(reservation)).Should()
+                .BeTrue();
+            (await service.Add(reservation1)).Should()
+                .BeTrue();
+            (await service.Add(incorrectReservation)).Should()
+                .BeFalse();
             (await _genericRepository.GetAllAsync()).Should().Equal(reservations);
             (await _genericRepository.GetByIdAsync(1)).Should().Be(reservation);
-            _genericRepository.Invoking(s => s.GetByIdAsync(4)).Should().Throw<Exception>()
+            _genericRepository.Invoking(s => s.GetByIdAsync(4)).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 4 doesn't exist");
-            reserve.From = reserve.From.AddDays(5);
-            reserve.To = reserve.From.AddHours(2);
-            reservation.TimeFrom = reserve.From;
-            reservation.TimeTo = reserve.To;
-            (await service.Update(reserve, user, meetingRoom)).Should()
-                .Be(new Tuple<bool, Reservation>(true, reservation));
+            reservation.TimeFrom = reservation.TimeFrom.AddDays(5);
+            reservation.TimeTo = reservation.TimeFrom.AddHours(2);
+            (await service.Update(reservation)).Should()
+                .BeTrue();
             _genericRepository.Query()
                 .Where(x => x.MeetingRoomId == meetingRoom1.Id && x.TimeFrom < intervalTo && x.TimeTo > intervalFrom)
                 .ToList().Should().Equal(intervalReservations);
-            reserve1.From = reserve.From.AddHours(-1);
-            reserve1.To = reserve1.From.AddHours(2);
-            reserve1.MeetingRoomId = meetingRoom.Id;
-            (await service.Update(reserve1, user1, meetingRoom)).Should()
-                .Be(new Tuple<bool, Reservation>(false, null));
+            reservation1.TimeFrom = reservation.TimeFrom.AddHours(-1);
+            reservation1.TimeTo = reservation1.TimeFrom.AddHours(2);
+            reservation1.MeetingRoomId = meetingRoom.Id;
+            (await service.Update(reservation1)).Should()
+                .BeFalse();
             (await service.Delete(1)).Should().Be(reservation);
-            service.Invoking(y => y.Delete(4)).Should().Throw<Exception>()
+            service.Invoking(y => y.Delete(4)).Should().ThrowAsync<Exception>()
                 .WithMessage("Entity with id 4 doesn't exist");
         }
     }
