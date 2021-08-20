@@ -39,7 +39,6 @@ namespace BusinessLogic.Services
                     .Where(x => x.MeetingRoomId == reservation.MeetingRoomId && x.TimeFrom < reservation.TimeTo && x.TimeTo > reservation.TimeFrom);
             if (reservation.Id != 0)
                 query = query.Where(x => x.Id != reservation.Id);
-            Console.WriteLine($"ddd, {reservation.TimeFrom < DateTime.Now.AddMinutes(-10)} {reservation.TimeTo < reservation.TimeFrom} {reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime} {query.Any()}");
             return reservation.TimeFrom < DateTime.Now.AddMinutes(-10) || reservation.TimeTo < reservation.TimeFrom || reservation.TimeTo.Subtract(reservation.TimeFrom) > _maximumReservationTime || query.Any();
         }
 
@@ -60,6 +59,11 @@ namespace BusinessLogic.Services
         public async Task<Reservation> Delete(int id)
         {
             return await _genericRepository.Delete(id);
+        }
+
+        public List<Reservation> GetForUser(int userId)
+        {
+            return _genericRepository.Query().Where(x => x.UserId == userId && x.TimeTo > DateTime.Now).ToList();
         }
     }
 }
