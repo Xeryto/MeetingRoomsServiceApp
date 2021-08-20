@@ -21,17 +21,15 @@ namespace MeetingRoomsServiceApp.Controllers
     {
         private readonly UserService _service;
         private readonly ReservationService _reservationService;
-        private readonly MapperConfiguration editIndexConfig = new(cfg => cfg
-        .CreateMap<User, UserEditModel>()
-        .ForMember(x => x.Image, opt => opt.Ignore())
-        .ForMember(x => x.EditNotValid, opt => opt.Ignore())
+        private readonly MapperConfiguration editIndexConfig = new(cfg => cfg.CreateMap<User, UserEditModel>()
+        .ForMember(x => x.Image, opt => opt.Ignore()).ForMember(x => x.EditNotValid, opt => opt.Ignore())
         .ForMember(x => x.UserId, opt => opt.Ignore()));
-        private readonly MapperConfiguration editConfig = new(cfg => cfg
-        .CreateMap<UserEditModel, User>()
+        private readonly MapperConfiguration editConfig = new(cfg => cfg.CreateMap<UserEditModel, User>()
+        .ForMember(x => x.Image, opt => opt.Ignore()));
+        private readonly MapperConfiguration deleteConfig = new(cfg => cfg.CreateMap<User, UserDeleteModel>()
         .ForMember(x => x.Image, opt => opt.Ignore()));
         private readonly MapperConfiguration config = new(cfg => cfg
-        .CreateMap<UserPostModel, User>()
-        .ForMember("Image", opt => opt.Ignore()));
+        .CreateMap<UserPostModel, User>().ForMember("Image", opt => opt.Ignore()));
 
         public UsersController(UserService service, ReservationService reservationService)
         {
@@ -70,7 +68,13 @@ namespace MeetingRoomsServiceApp.Controllers
                 }
                 
                 await _service.Add(user);
-                return RedirectToAction(nameof(Login));
+                UserCacheModel userCache = new()
+                {
+                    Id = user.Id,
+                    Image = user.Image
+                };
+                WebCache.Set("LoggedIn", userCache, 60, true);
+                return RedirectToAction("IndexWithDates", "Reservations");
             }
             return View(userPost);
         }
@@ -111,6 +115,13 @@ namespace MeetingRoomsServiceApp.Controllers
                 user.Image = stream.ToArray();
             }
             await _service.Update(user);
+            WebCache.Remove("LoggedIn");
+            UserCacheModel userCache = new()
+            {
+                Id = user.Id,
+                Image = user.Image
+            };
+            WebCache.Set("LoggedIn", userCache, 60, true);
             return RedirectToAction("IndexWithDates", "Reservations");
         }
 
@@ -118,7 +129,10 @@ namespace MeetingRoomsServiceApp.Controllers
         public async Task<IActionResult> Delete(int id, int userId)
         {
             var user = await _service.GetById(id);
-            return View(user);
+            var mapper = new Mapper(deleteConfig);
+            var userPost = mapper.Map<User, UserDeleteModel>(user);
+            WebCache.Remove("LoggedIn");
+            return View(userPost);
         }
 
         // POST: Users/Delete/5
