@@ -43,7 +43,7 @@
                                         <li><a class="dropdown-item" asp-controller="Users" asp-action="Logout">Log out</a></li>
                                         <li><hr class="dropdown-divider" /></li>
                                         <li><a class="dropdown-item" asp-controller="Users" asp-action="Edit" asp-route-id="@logged.Id">Edit</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Delete" asp-route-id="@logged.Id">Delete</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Delete" asp-route-id="@logged.Id" asp-route-userId="@logged.Id">Delete</a></li>
                                     </ul>
                                 </div>
                                 <a asp-controller="Users" asp-action="UserPage" style="margin-left: -0.2rem">
@@ -61,23 +61,25 @@
                                         }
                                     </button>
                                 </a>
-                                        }
-                                        else
-                                        {
-                                        <div class="btn-group dropstart" role="group">
-                                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <span class="visually-hidden">Toggle Dropstart</span>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <a class="nav-link text-dark" asp-controller="Users" asp-action="Login">Log In</a>
-                                            </ul>
-                                        </div>
-                                        <button type="button" class="btn btn-secondary shorten">
-                                            <a asp-controller="Users" asp-action="Login"><img src="~/img/default-user-icon.jpg" alt="user" /></a>
-                                        </button>
-                                        }
-                                        }
-                                    </div>
+                            }
+                            else
+                            {
+                                <div class="btn-group dropstart" role="group">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropstart</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <a class="nav-link text-dark" asp-controller="Users" asp-action="Login">Log In</a>
+                                    </ul>
+                                </div>
+                                <a asp-controller="Users" asp-action="Login" style="margin-left: -0.2rem">
+                                    <button type="button" class="btn btn-secondary shorten">
+                                        <img src="~/img/default-user-icon.jpg" alt="user" />
+                                    </button>
+                                </a>
+                            }
+                        }
+                    </div>
                 </div>
             </div>
         </nav>

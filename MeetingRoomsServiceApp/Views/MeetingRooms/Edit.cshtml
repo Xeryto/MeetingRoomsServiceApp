@@ -15,15 +15,15 @@
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <input asp-for="Name" class="form-control" required/>
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Color" class="control-label"></label>
-                <input asp-for="Color" class="form-control" type="color"/>
+                <input asp-for="Color" class="form-control" type="color" required/>
                 <span asp-validation-for="Color" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group formMargin">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
