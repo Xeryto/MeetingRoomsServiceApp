@@ -1,29 +1,113 @@
-﻿@model ResultModel
+﻿@using System.Web.Helpers; 
+
+@model ResultModel
+
 @{
-    ViewData["Title"] = "Список дней за период";
-    List<string> colors = new List<string>() { "yellow", "green", "red" };
+    ViewData["Title"] = "Список резерваций за период";
 }
 
-<h1>Список дней за период</h1>
+<h1>Список резерваций за период</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    @{
+        UserCacheModel user = WebCache.Get("LoggedIn");
+        if (user == null)
+        {
+            <a asp-controller="Users" asp-action="Login">Log in to create new</a>
+        }
+        else
+        {
+            <a asp-action="Create" asp-route-userId="@user.Id">Create New</a>
+        }
+    }
 </p>
 
 <form asp-controller="Reservations" asp-action="IndexWithDates" method="post">
-    С: <input asp-for="Start" placeholder="@DateTime.Now" />
-    До: <input asp-for="End" placeholder="@DateTime.Now.AddHours(1)" />
-        <label asp-for="MeetingRoomId" class="control-label"></label>
-        <select asp-for="MeetingRoomId" class="form-control" asp-items="ViewBag.MeetingRoomId">
-            <option>All</option>
-        </select>
-        <button type="submit">Обновить список</button>
+    С: <input asp-for="Start" />
+    До: <input asp-for="End" />
+    <label asp-for="MeetingRoomId" class="control-label"><select asp-for="MeetingRoomId" class="form-control" asp-items="ViewBag.MeetingRoomId">
+    <option>All</option>
+</select></label>
+    
+    <button type="submit">Обновить список</button>
 </form>
 <br />
 
-@for (int i = 0; i < Math.Ceiling((double)(Model.End.Subtract(Model.Start).Days+1)/7); i++)
+@for (int i = 0; i < Math.Ceiling((double)(Model.End.Subtract(Model.Start).Days + 1) / 7); i++)
 {
-    <table border="1">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-1" ></div>
+        @for (int j = 0; j < 7; j++)
+        {
+            <div class="col-md-1" >
+                @Model.Start.AddDays(7 * i + j).ToShortDateString()
+            </div>
+        }
+    </div>
+    @{ var temp = Model.Start.AddDays(7 * (i + 1));
+        DateTime curFrom = new DateTime(temp.Year, temp.Month, temp.Day, 8, 0, 0);
+        DateTime curTo = curFrom.AddMinutes(30);}
+    @for (int j = 0; j < 29; j++)
+    {
+        curFrom = curFrom.AddDays(-7);
+        curTo = curTo.AddDays(-7);
+        <div class="row">
+            @if (j % 2 != 0)
+            {
+                <div class="col-md-1" >
+                    @(8+j/2):30
+                </div>
+            }
+            else
+            {
+                <div class="col-md-1" >
+                    @(8+j/2):00
+                </div>
+            }
+            @for (int l = 0; l < 7; l++)
+            {
+                var reservedHere = Model.Reservations.Where(x => x.TimeFrom < curTo && x.TimeTo > curFrom).ToList();
+                if (reservedHere.Any())
+                {
+                    <div class="col-md-1" >
+                        <table height="100%" width="100%">
+                                <tr height="0px">
+                                    <th colspan="@reservedHere">
+
+                                    </th>
+                                </tr>
+                                <tr>
+                                    @foreach (var reservation in reservedHere)
+                                    {
+
+                                        <td><a asp-controller="Reservations" asp-action="Details" asp-route-id="@reservation.Id"><div style="background-color: @reservation.MeetingRoom.Color; width: 100%; height: 100%;"></div></a></td>
+
+                                        //break;
+                                    }
+                                </tr>
+                            
+                        </table>
+                                
+                    </div>
+                    
+                    
+                }
+                else
+                {
+                    <div class="col-md-1" >
+
+                    </div>
+                }
+                curFrom = curFrom.AddDays(1);
+                curTo = curTo.AddDays(1);
+            }
+            </div>
+            curFrom = curFrom.AddMinutes(30);
+            curTo = curTo.AddMinutes(30);
+        }
+</div>
+@*<table border="1">
         <thead>
             <tr>
                 <th width="10%">
@@ -41,7 +125,7 @@
             @{ var temp = Model.Start.AddDays(7 * (i+1));
                 DateTime curFrom = new DateTime(temp.Year, temp.Month, temp.Day, 8, 0, 0);
                 DateTime curTo = curFrom.AddMinutes(30);}
-            @for (int j = 0; j < 29; j++) 
+            @for (int j = 0; j < 29; j++)
              {
                 curFrom = curFrom.AddDays(-7);
                 curTo = curTo.AddDays(-7);
@@ -65,7 +149,7 @@
                     {
                         foreach (var reservation in reservedHere)
                         {
-                            <td bgcolor="@colors[reservation.MeetingRoomId]"></td>
+                            <td bgcolor="@reservation.MeetingRoom.Color"></td>
                             break;
                         }
                     }
@@ -81,5 +165,5 @@
                 curTo = curTo.AddMinutes(30);
              }
         </tbody>
-    </table>
+    </table>*@
 }

@@ -1,4 +1,4 @@
-﻿@model DataAccessLayer.Models.Reservation
+﻿@model ReservationValidModel
 
 @{
     ViewData["Title"] = "Create";
@@ -12,13 +12,10 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
-            </div>
+            <input type="hidden" asp-for="UserId" />
             <div class="form-group">
                 <label asp-for="MeetingRoomId" class="control-label"></label>
-                <select asp-for="MeetingRoomId" class ="form-control" asp-items="ViewBag.MeetingRoomId"></select>
+                <select asp-for="MeetingRoomId" class="form-control" asp-items="ViewBag.MeetingRoomId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="TimeFrom" class="control-label"></label>
@@ -34,11 +31,22 @@
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
+        @{
+            if (Model != null)
+            {
+                
+                if (Model.NotValid)
+                {
+                    Console.WriteLine("true");
+                    <p><span class="text-danger">Choose appropriate time interval</span></p>
+                }
+            }
+        }
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="IndexWithDates">Back to List</a>
 </div>
 
 @section Scripts {

@@ -1,4 +1,4 @@
-﻿@model DataAccessLayer.Models.User
+﻿@model UserDeleteModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -33,7 +33,15 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="UserId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
+        @{
+            if (Model.DeleteNotValid)
+            {
+                <p><span class="text-danger">You can only delete yourself's profile</span></p>
+            }
+        }
+
     </form>
 </div>

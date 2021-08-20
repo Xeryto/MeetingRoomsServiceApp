@@ -1,0 +1,101 @@
+﻿@using System.Web.Helpers;
+
+@model UserPageModel
+@{
+    ViewData["Title"] = "Страница пользователя";
+    UserCacheModel userCache = WebCache.Get("LoggedIn");
+}
+
+
+
+
+<div class="row">
+        <div class="container">
+            <dl class="row">
+                <h4>Your information @*<button class="edit">Edit</button>*@</h4>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.User.Login)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.User.Login)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.User.Password)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.User.Password)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.User.Name)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.User.Name)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.User.Image)
+                </dt>
+                <dd class="col-sm-10">
+                    @{
+                        if (Model.User.Image == null)
+                        {
+                            <a asp-controller="Users" asp-action="UserPage"><img src="~/img/default-user-icon.jpg" alt="user" class="details"/></a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Users" asp-action="UserPage"><img src="data:image; base64,@Convert.ToBase64String(Model.User.Image)" alt="user" class="details"/></a>
+                        }
+                    }
+                </dd>
+            </dl>
+        </div>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-userId="@userCache.Id">Edit</a> |
+            <a asp-action="IndexWithDates">Back to List</a>
+        </div>
+</div>
+<hr />
+<div class="row">
+    <h4>Your upcoming reservations</h4>
+    <p>
+        <a asp-controller="Reservations" asp-action="Create" asp-route-userId="@userCache.Id">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Reservations.First().TimeFrom)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Reservations.First().TimeTo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Reservations.First().MeetingRoom)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Reservations)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TimeFrom)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TimeTo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MeetingRoomId)
+                    </td>
+                    <td>
+                        <a asp-controller="Reservations" asp-action="Edit" asp-route-id="@item.Id" asp-route-userId="@userCache.Id">Edit</a> |
+                        <a asp-controller="Reservations" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-controller="Reservations" asp-action="Delete" asp-route-id="@item.Id" asp-route-userId="@userCache.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@*<script src="~/js/editInformationOnUserPage.js"></script>*@

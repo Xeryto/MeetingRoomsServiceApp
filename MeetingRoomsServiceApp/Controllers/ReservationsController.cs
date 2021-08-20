@@ -10,6 +10,7 @@ using DataAccessLayer.Models;
 using BusinessLogic.Services;
 using BusinessLogic.Models;
 using MeetingRoomsServiceApp.Models;
+using AutoMapper;
 
 namespace MeetingRoomsServiceApp.Controllers
 {
@@ -18,6 +19,17 @@ namespace MeetingRoomsServiceApp.Controllers
         private readonly ReservationService _service;
         private readonly MeetingRoomService _meetingRoomService;
         private readonly UserService _userService;
+        private readonly MapperConfiguration config = new(cfg => cfg
+        .CreateMap<Reservation, ReservationValidModel>()
+        .ForMember(x => x.NotValid, opt => opt.Ignore()));
+        private readonly MapperConfiguration editConfig = new(cfg => cfg
+        .CreateMap<ReservationEditModel, Reservation>());
+        private readonly MapperConfiguration editIndexConfig = new(cfg => cfg
+        .CreateMap<Reservation, ReservationEditModel>()
+        .ForMember(x => x.TimeNotValid, opt => opt.Ignore())
+        .ForMember(x => x.UserNotValid, opt => opt.Ignore()));
+        private readonly MapperConfiguration validConfig = new(cfg => cfg
+        .CreateMap<ReservationValidModel, Reservation>());
 
         public ReservationsController(ReservationService service, UserService userService, MeetingRoomService meetingRoomService)
         {
@@ -35,14 +47,13 @@ namespace MeetingRoomsServiceApp.Controllers
         public async Task<IActionResult> IndexWithDates()
         {
             ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id");
-            var today = DateTime.Today;
-            var start = new DateTime(today.Year, today.Month, 1);
-            var end = start.AddMonths(1).AddDays(-1);
-            var list = GetDays(start, end);
-            var reservations = await _service.GetInInterval(start, end);
+            var today = DateTime.Today.AddDays(1- (int)DateTime.Today.DayOfWeek);
+            var end = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
+            var list = GetDays(today, end);
+            var reservations = await _service.GetInInterval(today, end);
             return View(new ResultModel
             {
-                Start = start,
+                Start = today,
                 End = end,
                 Result = list,
                 Reservations = reservations
@@ -53,6 +64,7 @@ namespace MeetingRoomsServiceApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> IndexWithDates(DateTime start, DateTime end, int? meetingRoomId)
         {
+            start = start.AddDays(1 - (int)start.DayOfWeek);
             ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", meetingRoomId);
             var list = GetDays(start, end);
             if (meetingRoomId == null)
@@ -96,10 +108,9 @@ namespace MeetingRoomsServiceApp.Controllers
         }
 
         // GET: Reservations/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int userId)
         {
             ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id");
-            ViewData["UserId"] = new SelectList(await _userService.GetAll(), "Id", "Id");
             return View();
         }
 
@@ -108,26 +119,31 @@ namespace MeetingRoomsServiceApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,MeetingRoomId,TimeFrom,TimeTo")] Reservation reservation)
+        public async Task<IActionResult> Create(int userId, [Bind("Id,UserId,MeetingRoomId,TimeFrom,TimeTo")] ReservationValidModel reservationValid)
         {
+            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservationValid.MeetingRoomId);
             if (ModelState.IsValid)
             {
+                var mapper = new Mapper(validConfig);
+                var reservation = mapper.Map<ReservationValidModel, Reservation>(reservationValid);
                 var result = await _service.Add(reservation);
-                if (result) return RedirectToAction(nameof(Index));
-                else return Conflict("Wrong time");
+                if (result) return RedirectToAction(nameof(IndexWithDates));
+                else return View(new ReservationValidModel()
+                {
+                    NotValid = true
+                });
             }
-            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservation.MeetingRoomId);
-            ViewData["UserId"] = new SelectList(await _userService.GetAll(), "Id", "Id", reservation.UserId);
-            return View(reservation);
+            return View(reservationValid);
         }
 
         // GET: Reservations/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, int userId)
         {
             var reservation = await _service.GetById(id);
-            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservation.MeetingRoomId);
-            ViewData["UserId"] = new SelectList(await _userService.GetAll(), "Id", "Id", reservation.UserId);
-            return View(reservation);
+            var mapper = new Mapper(editIndexConfig);
+            var reservationEdit = mapper.Map<Reservation, ReservationEditModel>(reservation);
+            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservationEdit.MeetingRoomId);
+            return View(reservationEdit);
         }
 
         // POST: Reservations/Edit/5
@@ -135,39 +151,69 @@ namespace MeetingRoomsServiceApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,MeetingRoomId,TimeFrom,TimeTo")] Reservation reservation)
+        public async Task<IActionResult> Edit(int id, int userId, [Bind("Id,UserId,MeetingRoomId,TimeFrom,TimeTo")] ReservationEditModel reservationEdit)
         {
+            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservationEdit.MeetingRoomId);
             if (ModelState.IsValid)
             {
-                var result = await _service.Update(reservation);
-                if (result) return RedirectToAction(nameof(Index));
-                else return Conflict("Wrong time");
+                reservationEdit.UserId = (await _service.GetById(id)).UserId;
+                reservationEdit.TimeNotValid = false;
+                reservationEdit.UserNotValid = false;
+                if (reservationEdit.UserId == userId)
+                {
+                    var mapper = new Mapper(editConfig);
+                    var reservation = mapper.Map<ReservationEditModel, Reservation>(reservationEdit);
+                    var result = await _service.Update(reservation);
+                    if (result) return RedirectToAction(nameof(IndexWithDates));
+                    else
+                    {
+                        reservationEdit.TimeNotValid = true;
+                        return View(reservationEdit);
+                    }
+                }
+                else
+                {
+                    reservationEdit.UserNotValid = true;
+                    return View(reservationEdit);
+                }
+                
             }
-            ViewData["MeetingRoomId"] = new SelectList(await _meetingRoomService.GetAll(), "Id", "Id", reservation.MeetingRoomId);
-            ViewData["UserId"] = new SelectList(await _userService.GetAll(), "Id", "Id", reservation.UserId);
-            return View(reservation);
+            return View(reservationEdit);
         }
 
         // GET: Reservations/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, int userId)
         {
             var reservation = await _service.GetById(id);
-            return View(reservation);
+            var mapper = new Mapper(config);
+            var deleteModel = mapper.Map<Reservation, ReservationValidModel>(reservation);
+            return View(deleteModel);
         }
 
         // POST: Reservations/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int userId)
         {
-            await _service.GetById(id);
-            return RedirectToAction(nameof(Index));
+            var reservation = await _service.GetById(id);
+            if (reservation.UserId != userId)
+            {
+                var mapper = new Mapper(config);
+                var deleteModel = mapper.Map<Reservation, ReservationValidModel>(reservation);
+                deleteModel.NotValid = true;
+                return View(deleteModel);
+            }
+            await _service.Delete(id);
+            return RedirectToAction(nameof(IndexWithDates));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetReservationsInInterval(DateTime from,  DateTime to) {
-            if (from > to) return Conflict("Use appropriate interval");
+            if (from > to) return View(new ReservationIntervalModel()
+            {
+                TimeNotValid = true
+            });
             var rooms = await _meetingRoomService.GetAll();
             List<ReservationsListModel> res = new();
             foreach (MeetingRoom room in rooms)
@@ -180,7 +226,10 @@ namespace MeetingRoomsServiceApp.Controllers
                 res.Add(reservationsListModel);
             }
 
-            return View(res);
+            return View(new ReservationIntervalModel()
+            {
+                Reservations = res
+            });
         } 
     }
 }

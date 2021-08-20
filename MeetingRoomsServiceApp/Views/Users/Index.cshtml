@@ -1,7 +1,17 @@
-﻿@model IEnumerable<DataAccessLayer.Models.User>
+﻿@using System.Web.Helpers;
+
+@model IEnumerable<DataAccessLayer.Models.User>
 
 @{
     ViewData["Title"] = "Index";
+    UserCacheModel userCache = WebCache.Get("LoggedIn");
+    if (userCache == null)
+    {
+        userCache = new UserCacheModel()
+        {
+            Id = 0
+        };
+    }
 }
 
 <h1>Index</h1>
@@ -21,6 +31,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -37,9 +50,20 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @{
+                                        if (item.Image == null)
+                                        {
+                                            <a asp-controller="Users" asp-action="UserPage"><img src="~/img/default-user-icon.jpg" alt="user" /></a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Users" asp-action="UserPage"><img src="data:image; base64,@Convert.ToBase64String(item.Image)" alt="user" /></a>
+                                        }
+                                    }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id" asp-route-userId="@userCache.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id" asp-route-userId="@userCache.Id">Delete</a>
             </td>
         </tr>
 }

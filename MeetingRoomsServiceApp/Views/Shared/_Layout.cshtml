@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web.Helpers;
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,9 +11,9 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MeetingRoomsServiceApp</a>
+        <nav class="navbar navbar-expand-lg navbar-toggleable-lg navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Reservations" asp-action="IndexWithDates">MeetingRoomsServiceApp</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -19,12 +21,63 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Reservations" asp-action="IndexWithDates">Home</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="MeetingRooms" asp-action="Index">Meeting rooms</a>
+                        </li>
                     </ul>
+                    <div class="btn-group">
+                        @{
+                            UserCacheModel logged = WebCache.Get("LoggedIn");
+                            if (logged != null)
+                            {
+                                <div class="btn-group dropstart" role="group">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropstart</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Logout">Log out</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Edit" asp-route-id="@logged.Id">Edit</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Delete" asp-route-id="@logged.Id">Delete</a></li>
+                                    </ul>
+                                </div>
+                                <a asp-controller="Users" asp-action="UserPage" style="margin-left: -0.2rem">
+                                    <button type="button" class="btn btn-secondary shorten">
+                                        @{
+                                            if (logged.Image == null)
+                                            {
+                                                <img src="~/img/default-user-icon.jpg" alt="user" />
+
+                                            }
+                                            else
+                                            {
+                                                <img src="data:image; base64,@Convert.ToBase64String(logged.Image)" alt="user" />
+                                            }
+                                        }
+                                    </button>
+                                </a>
+                                        }
+                                        else
+                                        {
+                                        <div class="btn-group dropstart" role="group">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="visually-hidden">Toggle Dropstart</span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <a class="nav-link text-dark" asp-controller="Users" asp-action="Login">Log In</a>
+                                            </ul>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary shorten">
+                                            <a asp-controller="Users" asp-action="Login"><img src="~/img/default-user-icon.jpg" alt="user" /></a>
+                                        </button>
+                                        }
+                                        }
+                                    </div>
                 </div>
             </div>
         </nav>

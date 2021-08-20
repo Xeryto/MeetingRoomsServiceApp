@@ -1,4 +1,4 @@
-﻿@model DataAccessLayer.Models.Reservation
+﻿@model ReservationEditModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -13,11 +13,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="UserId" />
             <div class="form-group">
                 <label asp-for="MeetingRoomId" class="control-label"></label>
                 <select asp-for="MeetingRoomId" class="form-control" asp-items="ViewBag.MeetingRoomId"></select>
@@ -36,12 +32,22 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
+            @{
+                if (Model.TimeNotValid)
+            {
+                <p><span class="text-danger">Time interval you've chosen is incorrect. Change it and try again'</span></p>
+            }
+                if (Model.UserNotValid)
+            {
+                <p><span class="text-danger">You can only edit your own reservations</span></p>
+            }
+             }
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="IndexWithDates">Back to List</a>
 </div>
 
 @section Scripts {

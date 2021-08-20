@@ -1,7 +1,17 @@
-﻿@model DataAccessLayer.Models.Reservation
+﻿@using System.Web.Helpers;
+
+@model DataAccessLayer.Models.Reservation
 
 @{
     ViewData["Title"] = "Details";
+    UserCacheModel userCache = WebCache.Get("LoggedIn");
+    if (userCache == null)
+    {
+        userCache = new UserCacheModel()
+        {
+            Id = 0
+        };
+    }
 }
 
 <h1>Details</h1>
@@ -26,17 +36,18 @@
             @Html.DisplayNameFor(model => model.MeetingRoom)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MeetingRoom.Id)
+            @Html.DisplayFor(model => model.MeetingRoom.Name) (id: @Html.DisplayFor(model => model.MeetingRoomId))
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
+            Owner
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
+            @Html.DisplayFor(model => model.User.Name) (id: @Html.DisplayFor(model => model.UserId))
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-userId="@userCache.Id">Edit</a> |
+    <a asp-action="Delete" asp-route-id="@Model.Id" asp-route-userId="@userCache.Id">Delete</a> |
+    <a asp-action="IndexWithDates">Back to List</a>
 </div>

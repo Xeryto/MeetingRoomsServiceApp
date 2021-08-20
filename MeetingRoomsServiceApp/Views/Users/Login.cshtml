@@ -1,0 +1,32 @@
+﻿@model UserLoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4" align="center">
+            <div style="border: 0.1rem solid black;">
+                <form asp-controller="Users" asp-action="Login" method="post">
+                    <p>Login</p>
+                    <input asp-for="Login" required />
+                    <p>Password</p>
+                    <input asp-for="Password" type="password" required />
+                    <p></p>
+                    <button type="submit">Log in</button>
+                </form>
+                @if (Model != null)
+                {
+                    if (Model.InfoNotValid)
+                    {
+                        <p><span class="text-danger">Login or password is incorrect. Try again</span></p>
+                    }
+                }
+            </div>
+            <p>Not registered yet? <a asp-controller="Users" asp-action="Create">Reserve here</a></p>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>

@@ -16,6 +16,7 @@ namespace BusinessLogic.DAL
         public GenericRepository(MeetingRoomContext context)
         {
             _context = context;
+            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             dbset = _context.Set<TEntity>();
         }
 

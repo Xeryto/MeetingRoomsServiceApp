@@ -42,10 +42,12 @@ namespace BusinessLogic.Services
             return _genericRepository.Query().Any(x => x.Login == login);
         }
 
-        public async Task<User> Add(User user)
+        public async Task<bool> Add(User user)
         {
+            if (CheckLoginExists(user)) return false;
             user.Password = Hash(user.Password);
-            return await _genericRepository.AddAsync(user);
+            await _genericRepository.AddAsync(user);
+            return true;  
         }
 
         public async Task<User> Delete(int id)
@@ -53,10 +55,12 @@ namespace BusinessLogic.Services
             return await _genericRepository.Delete(id);
         }
 
-        public async Task<User> Update(User user)
+        public async Task<bool> Update(User user)
         {
+            if (CheckLoginExists(user)) return false;
             user.Password = Hash(user.Password);
-            return await _genericRepository.UpdateAsync(user);
+            await _genericRepository.UpdateAsync(user);
+            return true;
         }
 
         public async Task<bool> Login(string login, string password)
@@ -120,6 +124,11 @@ namespace BusinessLogic.Services
                 if (b1[i] != b2[i]) return false;
             }
             return true;
+        }
+
+        private bool CheckLoginExists(User user)
+        {
+            return _genericRepository.Query().Any(x => x.Login == user.Login && x.Id != user.Id);
         }
     }
 }
